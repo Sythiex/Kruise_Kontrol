@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "zip",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "Zip_Mod.bat"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "zip and copy to mods",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "Zip_Mod.bat",
+                "copy_to_mods"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
