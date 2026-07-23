@@ -1,6 +1,6 @@
 {
     "name": "Kruise_Kontrol_Updated",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "title": "Kruise Kontrol Updated",
     "author": "Klonan, EliteHunter",
     "contact": "",
@@ -9,5 +9,5 @@
     "dependencies": [
         "base >= 1.1.0"
     ],
-    "factorio_version": "2.0"
+    "factorio_version": "2.1"
 }
