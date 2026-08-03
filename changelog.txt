@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.4.1
-Date: 2026-08-02
+Version: 0.5.0
+Date: 2026-08-03
+  Features:
+    - Added a per-player setting to allow or prevent handcrafting during automated actions.
   Bugfixes:
     - Fixed a crash when autobuilding required Kruise Kontrol to craft a missing item.
+    - Fixed automated actions repeatedly retrying when a required item could not be obtained.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.0
 Date: 2026-07-23

@@ -41,6 +41,16 @@ function Craft_item:finish()
     self.character:pop_state()
 end
 
+function Craft_item:fail(reason)
+    self.character:item_acquisition_failed(self.name, reason or "item-unavailable")
+end
+
+function Craft_item:on_item_acquisition_failed(name, reason)
+    self.character:print("Couldn't obtain ingredient " .. name)
+    self.last_failure_reason = reason
+    self.need_new_recipe = true
+end
+
 function Craft_item:get_next_recipe()
     -- Returns false if we have no more recipes we can use.
     self.character:print("Finding next recipe to use for " .. self.name)
@@ -69,7 +79,6 @@ end
 
 function Craft_item:get_ingredients()
     local recipe = prototypes.recipe[self.recipe]
-    local to_try = {}
     for k, ingredient in pairs(recipe.ingredients) do
         if self.character:has_item(ingredient.name, ingredient.amount) then
             -- We already have enough of this item.
@@ -79,21 +88,12 @@ function Craft_item:get_ingredients()
             self.need_new_recipe = true
             return
         else
-            table.insert(to_try, ingredient)
+            -- Queue one ingredient at a time so failures return directly to this craft state.
+            self.attempted_ingredients[ingredient.name] = true
+            self.character:find_item(ingredient.name, ingredient.amount * self.count)
+            return true
         end
     end
-
-    if not next(to_try) then
-        -- We have all the items I guess, return false to continue execution of main update
-        return
-    end
-
-    for k, ingredient in pairs(to_try) do
-        self.attempted_ingredients[ingredient.name] = true
-        self.character:find_item(ingredient.name, ingredient.amount * self.count)
-    end
-
-    return true
 end
 
 function Craft_item:update()
@@ -102,6 +102,12 @@ function Craft_item:update()
     if self.character:has_item(self.name, self.count) then
         --We already have enough of this item anyway.
         self:finish()
+        return
+    end
+
+    if not self.character:allows_handcrafting() then
+        self.character:print("Handcrafting is disabled")
+        self:fail("handcrafting-disabled")
         return
     end
 
@@ -115,7 +121,7 @@ function Craft_item:update()
 
     if self.need_new_recipe and not self:get_next_recipe() then
         self.character:print("Failed to find a recipe we can use for " .. self.name)
-        self:finish()
+        self:fail(self.last_failure_reason)
         return
     end
 

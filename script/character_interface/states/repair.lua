@@ -17,6 +17,11 @@ function Repair:finish()
     self.character:pop_state()
 end
 
+function Repair:on_item_acquisition_failed(name, reason)
+    self.item_failure = { name = name, reason = reason }
+    self.character:exclude_target_from_pending_batches(self.target)
+end
+
 local repair_tools
 
 local get_repair_tools = function()
@@ -60,6 +65,9 @@ function Repair:update()
         self.search_tool = next(get_repair_tools(), self.search_tool)
 
         if not self.search_tool then
+            if self.item_failure then
+                self.character:report_item_acquisition_failure(self.item_failure.name, self.item_failure.reason)
+            end
             self:finish()
             return
         end

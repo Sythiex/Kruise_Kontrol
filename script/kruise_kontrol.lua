@@ -38,6 +38,7 @@ end
 function Klient:get_or_make_character()
     if self.character then
         if self.character.entity.valid then
+            self.character.player_index = self.index
             return self.character
         end
         self.character = nil
@@ -98,7 +99,7 @@ end
 
 function Klient:make_character()
     if not self.player.character then return end
-    self.character = Character.new(self.player.character)
+    self.character = Character.new(self.player.character, self.index)
 end
 
 local on_player_action_command = function(event)
@@ -146,6 +147,14 @@ lib.on_load = function()
     script_data = storage.kruise_kontrol or script_data
     for k, klient in pairs(script_data.klients) do
         setmetatable(klient, Klient.metatable)
+    end
+end
+
+lib.on_configuration_changed = function()
+    for k, klient in pairs(script_data.klients) do
+        if klient.character then
+            klient.character.player_index = klient.index
+        end
     end
 end
 

@@ -9,7 +9,17 @@ local vehicle_brake_on_cancel =
   order = "a"
 }
 
+local allow_handcrafting =
+{
+  type = "bool-setting",
+  name = Constants.settings.allow_handcrafting,
+  setting_type = "runtime-per-user",
+  default_value = true,
+  order = "b"
+}
+
 data:extend
 {
-  vehicle_brake_on_cancel
+  vehicle_brake_on_cancel,
+  allow_handcrafting
 }

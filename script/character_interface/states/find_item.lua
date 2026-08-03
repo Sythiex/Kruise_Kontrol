@@ -24,8 +24,14 @@ function Find_item:finish(dont_update_state)
 end
 
 function Find_item:fail()
-    --In this case, we try to craft the item we are looking for.
     self.character:print("Couldn't find " .. self.name)
+
+    if not self.character:allows_handcrafting() then
+        self.character:item_acquisition_failed(self.name, "handcrafting-disabled")
+        return
+    end
+
+    -- In this case, we try to craft the item we are looking for.
     self:finish(true)
     self.character:craft_item(self.name, self.count)
 end

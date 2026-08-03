@@ -1,7 +1,8 @@
 local constants = {}
 
 constants.settings = {
-    brake_on_cancel = "klient-vehicle-brake-on-cancel"
+    brake_on_cancel = "klient-vehicle-brake-on-cancel",
+    allow_handcrafting = "klient-allow-handcrafting"
 }
 
 constants.events = {

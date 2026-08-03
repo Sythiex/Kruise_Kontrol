@@ -1,5 +1,6 @@
 local States = require("script/character_interface/states/states")
 local util = require("script/character_script_util")
+local Constants = require("constants")
 
 local script_data =
 {
@@ -20,7 +21,7 @@ function Character.get_character(unit_number)
     end
 end
 
-function Character.new(character_entity)
+function Character.new(character_entity, player_index)
     if character_entity.type ~= "character" then
         error("Character interface only works on character entities." .. character_entity.type)
     end
@@ -32,6 +33,7 @@ function Character.new(character_entity)
         entity = character_entity,
         state_stack = {},
         index = character_entity.unit_number,
+        player_index = player_index,
     }
 
     setmetatable(character, Character.metatable)
@@ -345,8 +347,66 @@ function Character:is_moving()
 end
 
 function Character:craft_item(name, count)
+    if not self:allows_handcrafting() then
+        self:print("Handcrafting is disabled")
+        return false
+    end
+
     self:print("Told to find item " .. name .. " x" .. count)
     self:push_state(States.craft_item(self, name, count))
+    return true
+end
+
+function Character:get_player()
+    if self.player_index then
+        local player = game.get_player(self.player_index)
+        if player then return player end
+    end
+
+    return self.entity.player
+end
+
+function Character:allows_handcrafting()
+    local player = self:get_player()
+    if not player then return false end
+
+    local player_settings = settings.get_player_settings(player)
+    return player_settings[Constants.settings.allow_handcrafting].value
+end
+
+function Character:item_acquisition_failed(name, reason)
+    table.remove(self.state_stack, 1)
+
+    local parent = self.state_stack[1]
+    if parent and parent.on_item_acquisition_failed then
+        parent:on_item_acquisition_failed(name, reason)
+        self:update()
+        return
+    end
+
+    self:report_item_acquisition_failure(name, reason)
+    self:clear_state()
+end
+
+function Character:report_item_acquisition_failure(name, reason)
+    local failure_key = name .. ":" .. reason
+    local previous = self.last_reported_item_failure
+    if previous and previous.key == failure_key and game.tick - previous.tick < 300 then
+        return
+    end
+    self.last_reported_item_failure = { key = failure_key, tick = game.tick }
+
+    local item = prototypes.item[name]
+    local localised_name = item and item.localised_name or name
+    self:remark({ "item-unavailable", localised_name })
+end
+
+function Character:exclude_target_from_pending_batches(target)
+    for _, state in pairs(self.state_stack) do
+        if state.exclude_target then
+            state:exclude_target(target)
+        end
+    end
 end
 
 function Character:get_mining_progress()
@@ -745,8 +805,8 @@ lib.on_init = function()
     game.forces.neutral.set_cease_fire("enemy", false)
 end
 
-lib.new = function(character_entity)
-    return Character.new(character_entity)
+lib.new = function(character_entity, player_index)
+    return Character.new(character_entity, player_index)
 end
 
 return lib

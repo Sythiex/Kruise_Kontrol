@@ -55,6 +55,11 @@ function State:finish()
     self.character:pop_state()
 end
 
+function State:on_item_acquisition_failed(name, reason)
+    self.item_failure = { name = name, reason = reason }
+    self.character:exclude_target_from_pending_batches(self.target)
+end
+
 function State:update()
     if not (self.target.valid) then
         self:finish()
@@ -92,6 +97,9 @@ function State:update()
 
     if not self.current_item then
         --We have gone through all items, none available.
+        if self.item_failure then
+            self.character:report_item_acquisition_failure(self.item_failure.name, self.item_failure.reason)
+        end
         self:finish()
         return
     end

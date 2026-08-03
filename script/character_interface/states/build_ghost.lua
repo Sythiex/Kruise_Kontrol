@@ -33,6 +33,11 @@ function Build_ghost:fail()
     self.character:pop_state()
 end
 
+function Build_ghost:on_item_acquisition_failed(name, reason)
+    self.item_failure = { name = name, reason = reason }
+    self.character:exclude_target_from_pending_batches(self.target)
+end
+
 function Build_ghost:succeed()
     self.character:pop_state()
     self.character:wait(5)
@@ -124,6 +129,9 @@ function Build_ghost:update()
     end
 
     if not self.item then
+        if self.item_failure then
+            self.character:report_item_acquisition_failure(self.item_failure.name, self.item_failure.reason)
+        end
         self:fail()
         return
     end

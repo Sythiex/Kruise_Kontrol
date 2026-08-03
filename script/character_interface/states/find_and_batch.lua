@@ -22,6 +22,11 @@ local index = function(entity)
     return entity.unit_number or script.register_on_object_destroyed(entity)
 end
 
+function Find_and_batch:exclude_target(entity)
+    if not (entity and entity.valid) then return end
+    self.fail_cache[index(entity)] = true
+end
+
 function Find_and_batch:find()
     local entities = self.character:find_nearby_entities(self.param.radius or 64, self.param)
 

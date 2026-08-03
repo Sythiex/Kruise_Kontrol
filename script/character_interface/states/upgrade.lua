@@ -29,6 +29,11 @@ function Upgrade:fail()
     self.character:pop_state()
 end
 
+function Upgrade:on_item_acquisition_failed(name, reason)
+    self.item_failure = { name = name, reason = reason }
+    self.character:exclude_target_from_pending_batches(self.target)
+end
+
 function Upgrade:succeed()
     self.character:pop_state()
     self.character:wait(15)
@@ -75,6 +80,9 @@ function Upgrade:update()
 
     if not self.item then
         --no items to build
+        if self.item_failure then
+            self.character:report_item_acquisition_failure(self.item_failure.name, self.item_failure.reason)
+        end
         self:fail()
         return
     end
