@@ -1,4 +1,4 @@
-rendering.clear("Kruise_Kontrol_Updated")
+rendering.clear("Kruise_Kontrol_Updated_Fixed")
 
 local event_handler = require("event_handler")
 

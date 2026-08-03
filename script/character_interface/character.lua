@@ -475,7 +475,15 @@ end
 function Character:can_craft_recipe(recipe)
     if not recipe.enabled then return end
 
-    if not self.entity.prototype.crafting_categories[recipe.category] then return end
+    local crafting_categories = self.entity.prototype.crafting_categories or {}
+    local can_craft_category = false
+    for _, category in pairs(recipe.categories) do
+        if crafting_categories[category] then
+            can_craft_category = true
+            break
+        end
+    end
+    if not can_craft_category then return end
 
     for k, ingredient in pairs(recipe.ingredients) do
         if ingredient.type == "fluid" then return end
