@@ -36,25 +36,24 @@ function Find_item:fail()
     self.character:craft_item(self.name, self.count)
 end
 
-local find_types =
+local find_type_thresholds =
 {
     ["container"] = 0,
     ["furnace"] = 0,
     ["assembling-machine"] = 0,
     ["logistic-container"] = 0,
+    ["infinity-container"] = 0,
     ["mining-drill"] = 5
 }
 
+local find_types = {}
+for entity_type in pairs(find_type_thresholds) do
+    table.insert(find_types, entity_type)
+end
+
 local find_params =
 {
-    type =
-    {
-        "container",
-        "logistic-container",
-        "furnace",
-        "assembling-machine",
-        "mining-drill",
-    }
+    type = find_types
 }
 
 function Find_item:find_new_target()
@@ -63,7 +62,7 @@ function Find_item:find_new_target()
         local inventory = entity.get_output_inventory()
         if not inventory then
             entities[k] = nil
-        elseif inventory.get_item_count(self.name) <= find_types[entity.type] then
+        elseif inventory.get_item_count(self.name) <= find_type_thresholds[entity.type] then
             entities[k] = nil
         end
     end
